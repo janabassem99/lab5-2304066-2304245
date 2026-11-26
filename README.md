@@ -1,260 +1,128 @@
-# The Reading Room — Lab 4, Part II
-**Jana Bassem — 2304066**  
-**Farida Mohamed — 2304245**
+# The Reading Room - Lab 5, Part II
 
-An extension of our Lab 2 and Lab 3 Flask website, with the same simple interface. All F2.1–F2.6 features and the placeholder bonus are included. Part I is not included. The handout specifies a group of three; add your third teammate's details before submission.
+**Jana Bassem - 2304066**  
+**Farida Mohamed - 2304245**
+
+The same Flask library website continues Labs 2, 3 and 4, with seven library tables and six new Lab 5 pages. MySQL 8.0.31 or later is required for INTERSECT and EXCEPT. Jana's installed MySQL is 8.4.11.
 
 ## Start the website
+
+Open lab5-2304066.code-workspace in VS Code to load this project folder. On a new machine, create the Python environment and install the dependencies.
+
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r website/requirements.txt
 ```
-Copy website/.env.example to website/.env and enter your own MySQL credentials. Use DB_NAME=library_lab4_2304066 and LAB2_DB_NAME=registration. Never publish .env, session files or existing personal data.
 
-On a **fresh machine only**, create and seed Lab 4:
+Copy website/.env.example to website/.env. Enter your own MySQL password and keep DB_NAME=library_lab5_2304066. Keep LAB2_DB_NAME=registration for the earlier task application.
+
+If Lab 4 exists on your machine and Lab 5 has not been created, preserve its current data by running this once.
+
+```sh
+python prepare_local.py
+```
+
+The helper copies all six Lab 4 tables into the new Lab 5 database and adds the review data and required country example. It refuses to overwrite an existing Lab 5 database. The source data is read as a one-time snapshot. Images are in website/static/uploads and should stay with your local project.
+
+On a fresh machine with no earlier library to copy, run the supplied SQL files instead.
+
 ```sh
 mysql -u root -p < problem2_DDL.sql
 mysql -u root -p < problem2_DML.sql
 ```
-The DDL resets library_lab4_2304066. Do not rerun it on your working database if you want to keep your changes. It does not reset Lab 2 or Lab 3.
 
-If you already have Lab 3 and Lab 4 does not exist, run `python prepare_local.py` instead of those two commands to preserve your old library rows. This refuses to overwrite an existing Lab 4 database. Jana's local database has already been prepared; just start the server.
+**The DDL drops and recreates the Lab 5 database. Use it for fresh setup. Use problem2_Queries.sql to demonstrate queries against existing data.** Lab 5 has already been prepared on Jana's Mac.
 
-For Lab 2, keep the existing registration database. On a new machine ONLY, use website/lab2/database/schema.sql to create it; that original script resets registration, so never run it over accounts/tasks you want to keep.
+Start the server and keep its terminal open.
 
 ```sh
 python website/app.py
 ```
-Open http://127.0.0.1:5003/ . Lab 2 is /lab2/, original library forms are /library/, and Lab 4 is /lab4/. Lab 4 discussion notes are /lab4/discussion.
+
+Open http://127.0.0.1:5003/ and choose Lab 5. Its six report pages start at /lab5/. Earlier pages are /lab2/, /library/ and /lab4/. A local server must be running for these addresses to open. On a new machine, Lab 2 also needs its own existing registration database, or its fresh schema in website/lab2/database/schema.sql.
 
 ## DBeaver
-Connect to the same host, port, user and password as website/.env (normally 127.0.0.1:3306). Refresh the connection and expand library_lab4_2304066 → Tables. The six tables are AUTHOR, PUBLISHER, CATEGORY, BOOK, MEMBER and LOAN. Open problem2_Queries.sql in an SQL editor and execute the script. It starts with USE library_lab4_2304066 and contains runnable sample values for the search.
-Refresh table data after website changes. Commit DBeaver changes if manual commit is enabled, then refresh the website. Do not execute the reset DDL merely to refresh the display.
 
-## Requirements
-| Feature | URL | SQL |
+Open the existing local MySQL connection. Refresh the database list and select library_lab5_2304066. Expand Tables to see AUTHOR, PUBLISHER, CATEGORY, BOOK, MEMBER, LOAN and REVIEW. Expand Views to see book_details.
+
+Open problem2_Queries.sql and run the statements. This SELECT script includes USE library_lab5_2304066. It contains every Lab 5 query, labelled F2.1-F2.6.
+
+```sql
+SELECT VERSION();
+SELECT DATABASE();
+SELECT * FROM REVIEW;
+SELECT * FROM book_details;
+SHOW CREATE VIEW book_details;
+```
+
+Refresh a data tab after website changes. Commit DBeaver edits when manual commit is enabled. Flask and DBeaver both access the same MySQL schema.
+
+## Part II coverage
+
+| Requirement | Page | SQL used |
 |---|---|---|
-| F2.1 Search + placeholder bonus | /lab4/search | LIKE, BETWEEN, WHERE, ORDER BY; parameter tuple |
-| F2.2 Catalogue | /lab4/catalogue | JOIN four tables |
-| F2.3 Reports | /lab4/reports | GROUP BY, HAVING, COUNT, AVG, SUM, MIN, MAX |
-| F2.4 Loans | /lab4/loans | JOIN, LEFT JOIN, IS NULL |
-| F2.5 Most borrowed | /lab4/popular | GROUP BY, ORDER BY, LIMIT |
-| F2.6 Authors | /lab4/authors | LEFT JOIN counts and same-country JOIN |
+| F2.1 Above average | /lab5/above-average | Scalar AVG subquery and the bonus view |
+| F2.2 Never borrowed | /lab5/never-borrowed | Correlated NOT EXISTS for books and members |
+| F2.3 Best of category | /lab5/categories | Correlated MAX and AVG subqueries, both using the bonus view |
+| F2.4 Active members | /lab5/active-members | Derived table of loan counts including zero, HAVING, EXISTS |
+| F2.5 Reviews | /lab5/reviews | LEFT JOIN, COUNT, AVG, CASE, COALESCE, HAVING with overall AVG |
+| F2.6 Countries and people | /lab5/countries | UNION, INTERSECT, EXCEPT and typed UNION ALL |
+| Discussion | /lab5/discussion | Explanations and bonus demonstration |
 
-The DML has 4 authors, 3 publishers, 3 categories, 10 books, 5 members and 12 loans, covering all required edge cases. Local imported Lab 3 records add to these counts. Imported books have unknown publisher/category labels and NULL years until you edit them. Images remain local files. The updated book form includes publisher, category and publication year.
+F2.2 returns the same book/member IDs as the Lab 4 LEFT JOIN reports, verified by check_lab5.py. F2.3 keeps every book tied at a category's maximum price. F2.4 includes zero-loan members in the denominator. F2.5 compares each book's average with the average of all individual ratings.
 
-## Files for submission
-- problem2_DDL.sql: clean six-table schema with foreign keys and cascading deletes.
-- problem2_DML.sql: repeatable demonstration seed for a fresh schema.
-- problem2_Queries.sql: every F2 query, labelled, runnable in MySQL/DBeaver.
-- website/: Flask site including earlier labs and new pages.
-- DISCUSSION_LAB4.md: explanations, expected seed results and practice questions.
-- README.md: setup instructions.
+## Bonus completed - book_details view
 
-lab3-reference/ preserves the old Lab 3 SQL and README for reference, not Lab 4 setup. prepare_local.py imports existing records into a new database. check_lab4.py verifies the SQL and website against a disposable database, requiring CREATE/DROP DATABASE privileges. It never writes to the user's library or registration tables.
+**The full Lab 5 bonus is implemented.**
+
+- problem2_DDL.sql creates book_details by joining BOOK, AUTHOR, PUBLISHER and CATEGORY.
+- F2.1 reads FROM book_details d.
+- Both F2.3 queries read FROM book_details d.
+- The F2.1 and F2.3 website pages display a visible bonus notice.
+- DISCUSSION_LAB5.md and /lab5/discussion explain how to demonstrate the view.
+
+The view stores a SELECT definition. Its next SELECT reflects changes committed to the underlying tables. The earlier Lab 4 placeholder bonus is retained in its search form.
+
+## REVIEW constraints
+
+REVIEW has review_id as primary key. book_id references BOOK with ON DELETE CASCADE. member_id references MEMBER. rating is NOT NULL and CHECK(rating BETWEEN 1 AND 5). UNIQUE(book_id, member_id) prevents the same member reviewing the same book twice.
+
+Deleting an author cascades to their books, then to their books' reviews and loans. Deleting a member with loans or reviews is restricted. Deleting referenced publishers and categories is restricted.
+
+## Demonstration data and expected fresh results
+
+The fresh DML inserts 5 authors, 3 publishers, 3 categories, 10 books, 5 members, 12 loans and 9 reviews.
+
+- The library average price is 19.95. Five books are above it.
+- Spain has an author and no publisher.
+- Palace Walk has ratings 5 and 4, an average of 4.50 and the Excellent label.
+- Sugar Street has ratings 3 and 4, an average of 3.50 and the Good label.
+- The Map of Love averages 2.00 and is Fair. Animal Farm has zero reviews, an average displayed as 0 and No review.
+- The average of all 9 ratings is 3.6667. Palace Walk, Palace of Desire and In the Eye of the Sun exceed it.
+- Average loans per member is 12 / 5 = 2.40. Demo Reader A has 5 and Demo Reader B has 3.
+- Four books were never borrowed and one member has no loans.
+- A one-book category returns that book as its maximum and returns no books above its category average.
+
+Jana's local Lab 5 database also includes all imported Lab 4 data, so live totals and averages can differ from the fresh seed results.
+
+## Files and discussion
+
+- problem2_DDL.sql, problem2_DML.sql and problem2_Queries.sql are the required Part II scripts.
+- website/lab5_queries.py contains the same report SQL.
+- website/lab5.py maps the page names to the queries. rows() in website/lab4.py executes them.
+- DISCUSSION_LAB5.md explains each query, the constraints, the Python flow and practice answers.
+- lab4-reference/ and lab3-reference/ preserve earlier SQL and notes.
+- prepare_local.py performs the one-time copy. check_lab5.py verifies the new work.
+
+This project covers the requested **Part II**. Part I COMPANY scripts and answers are separate handout deliverables.
 
 ## Verification
+
 ```sh
-python check_lab4.py
-```
-Checks cover seed counts, reports, all pages, combined search filters, injection-style search text, invalid inputs, book add/edit/delete and cascading deletion. Test data is isolated in lab4_verification_2304066 and removed afterwards.
-
-## Discussion
-Read DISCUSSION_LAB4.md or open /lab4/discussion. The source query definitions are website/lab4_queries.py; page handlers are website/lab4.py. MySQL stores data; DBeaver and Flask both access it. Lab 2 retains its own database and login session. DispatcherMiddleware routes /lab2 requests; Flask Blueprints handle the library and reports.
-
-## Part I — COMPANY database questions and answers
-
-These answers use the COMPANY schema from the Lab 4 handout. In Q1.1–Q1.4, replace the example IDs, names, and city with values from your own seed data. The examples assume department 5 exists and department 999 does not. Actual result rows depend on the seed data.
-
-### Q1.1 — INSERT
-
-**Question.** How do you add and display an employee and a project in an existing department? What happens when the employee's department does not exist?
-
-```sql
-INSERT INTO employee (ssn, fname, lname, bdate, address, gender, salary, super_ssn, Dno)
-VALUES ('900000001', 'Mona', 'Ali', '2000-04-15', 'Alexandria', 'F', 4500, NULL, 5);
-
-INSERT INTO project (Pnumber, Pname, Plocation, Dno)
-VALUES (90, 'Training', 'Alexandria', 5);
-
-SELECT * FROM employee WHERE ssn = '900000001';
-SELECT * FROM project WHERE Pnumber = 90;
-
--- Run separately to observe the expected error.
-INSERT INTO employee (ssn, fname, lname, bdate, address, gender, salary, super_ssn, Dno)
-VALUES ('900000002', 'Nour', 'Ali', '2000-05-15', 'Alexandria', 'F', 4500, NULL, 999);
+python check_lab5.py
 ```
 
-The first two statements add one row each. The final insert is rejected because `employee.Dno` must reference an existing department (MySQL foreign key error 1452).
+The check creates a uniquely named temporary database and removes it afterwards. It needs CREATE and DROP privileges for that test database. It verifies all scripts, seven tables, fourteen queries, expected seed results, Lab 4 equivalence, invalid/duplicate/orphan review rejection, cascades, tied prices, live view data, earlier routes, bonus notices and search injection inputs. It never drops or writes your working library databases.
 
-### Q1.2 — UPDATE
-
-**Question.** How do you give employees in one department a 10% raise, change a project's location, and check what happens if you assign an employee to a missing department?
-
-```sql
-UPDATE employee SET salary = salary * 1.10 WHERE Dno = 5;
-SELECT ssn, fname, lname, salary FROM employee WHERE Dno = 5;
-
-UPDATE project SET Plocation = 'Cairo' WHERE Pnumber = 90;
-SELECT Pnumber, Pname, Plocation FROM project WHERE Pnumber = 90;
-
--- Run separately to observe the expected error.
-UPDATE employee SET Dno = 999 WHERE ssn = '900000001';
-```
-
-A salary of 4500 becomes 4950. The project's location becomes Cairo. MySQL rejects the last update with a foreign key error (1452), so the employee's department stays the same.
-
-### Q1.3 — DELETE and ROLLBACK
-
-**Question.** How do you delete one dependent and one work assignment? Why can a department with employees be blocked from deletion, and what does rolling back an unfiltered delete do?
-
-```sql
-DELETE FROM dependent WHERE essn = '100000001' AND dependent_name = 'Sara';
-DELETE FROM works_on WHERE essn = '100000001' AND Pno = 1;
-
--- Run separately to observe the expected error with restrictive foreign keys.
-DELETE FROM department WHERE Dnumber = 5;
-
-START TRANSACTION;
-DELETE FROM dependent;
-SELECT * FROM dependent;
-ROLLBACK;
-SELECT * FROM dependent;
-```
-
-Each targeted delete uses both columns of the row's composite key. With restrictive foreign keys, MySQL rejects the department deletion (error 1451) while employees or projects reference it. Reassign those employees and projects to valid departments first, then delete the department. If you intend to delete the employees and projects too, clear their dependent and work assignment rows and resolve any supervisor or manager references before deleting the referenced rows.
-
-On an InnoDB table, the unfiltered delete removes every dependent row inside the transaction, so the first SELECT returns no rows. ROLLBACK restores the rows that existed when the transaction started. The earlier targeted deletes are outside that transaction and are not reversed if they were already committed.
-
-### Q1.4 — WHERE and DISTINCT
-
-**Question.** Find employees earning 3000–6000 in a given city, find employees with no supervisor, and list each staffed department number once.
-
-```sql
-SELECT fname, lname, salary
-FROM employee
-WHERE salary BETWEEN 3000 AND 6000 AND address LIKE '%Alexandria%'
-ORDER BY salary DESC;
-
-SELECT ssn, fname, lname FROM employee WHERE super_ssn IS NULL;
-
-SELECT DISTINCT Dno FROM employee WHERE Dno IS NOT NULL;
-```
-
-BETWEEN includes both endpoints. IS NULL checks for a missing supervisor, and DISTINCT removes repeated department numbers.
-
-### Q1.5 — Aggregation
-
-**Question.** How do you get the employee count and the total, average, minimum, and maximum salary in one query?
-
-```sql
-SELECT COUNT(*) AS employee_count, SUM(salary) AS total_salary,
-       AVG(salary) AS average_salary, MIN(salary) AS minimum_salary,
-       MAX(salary) AS maximum_salary
-FROM employee;
-```
-
-The query returns one summary row. COUNT(*) counts all employees, while the salary aggregates ignore NULL salaries.
-
-### Q1.6 — GROUP BY
-
-**Question.** How do you show the employee count and average salary for each department number?
-
-```sql
-SELECT Dno, COUNT(*) AS employee_count, AVG(salary) AS average_salary
-FROM employee
-GROUP BY Dno;
-```
-
-Each distinct Dno in the employee table produces one result row. Departments with zero employees appear in Q1.10 instead.
-
-### Q1.7 — HAVING
-
-**Question.** Which departments have more than two employees, first counting everyone and then counting only employees earning above 3000?
-
-```sql
-SELECT Dno, COUNT(*) AS employee_count
-FROM employee
-WHERE Dno IS NOT NULL
-GROUP BY Dno
-HAVING COUNT(*) > 2;
-
-SELECT Dno, COUNT(*) AS employee_count
-FROM employee
-WHERE Dno IS NOT NULL AND salary > 3000
-GROUP BY Dno
-HAVING COUNT(*) > 2;
-```
-
-WHERE filters individual rows before grouping, while HAVING filters the groups after their counts have been calculated.
-
-### Q1.8 — JOIN
-
-**Question.** How do you show each employee's first and last names with their department name?
-
-```sql
-SELECT e.fname, e.lname, d.Dname
-FROM employee e
-JOIN department d ON e.Dno = d.Dnumber;
-```
-
-The join replaces the department ID in the displayed result with the matching department name.
-
-### Q1.9 — JOIN three tables
-
-**Question.** For each work assignment, how do you show the employee's last name, project name, and hours?
-
-```sql
-SELECT e.lname, p.Pname, w.hours
-FROM works_on w
-JOIN employee e ON w.essn = e.ssn
-JOIN project p ON w.Pno = p.Pnumber;
-```
-
-WORKS_ON connects each employee to a project and stores the hours for that assignment.
-
-### Q1.10 — LEFT JOIN
-
-**Question.** How do you count employees in every department, including empty ones, and find projects with no work assignments?
-
-```sql
-SELECT d.Dnumber, d.Dname, COUNT(e.ssn) AS employee_count
-FROM department d
-LEFT JOIN employee e ON e.Dno = d.Dnumber
-GROUP BY d.Dnumber, d.Dname;
-
-SELECT p.Pnumber, p.Pname
-FROM project p
-LEFT JOIN works_on w ON w.Pno = p.Pnumber
-WHERE w.Pno IS NULL;
-```
-
-COUNT(e.ssn) gives zero for a department without a match because it ignores NULL. The second query selects projects whose right-hand work assignment is missing.
-
-### Q1.11 — Self join
-
-**Question.** How do you show every employee with their supervisor's name?
-
-```sql
-SELECT e.fname, e.lname, s.fname AS supervisor_fname, s.lname AS supervisor_lname
-FROM employee e
-LEFT JOIN employee s ON e.super_ssn = s.ssn;
-```
-
-Both aliases refer to EMPLOYEE. The left join keeps employees without supervisors, with NULL in the supervisor name columns.
-
-### Q1.12 — JOIN, GROUP BY, and HAVING
-
-**Question.** Which projects have more than 20 total work hours, ordered from the highest total down?
-
-```sql
-SELECT p.Pnumber, p.Pname, SUM(w.hours) AS total_hours
-FROM project p
-JOIN works_on w ON w.Pno = p.Pnumber
-GROUP BY p.Pnumber, p.Pname
-HAVING SUM(w.hours) > 20
-ORDER BY total_hours DESC;
-```
-
-The join gets the work assignments for each project. SUM adds their hours, and HAVING excludes totals of 20 or less. Grouping by the project ID keeps different projects with the same name separate.
+Passwords, .env, session files, virtual environments and personal image uploads are excluded from a shareable project. Use the sample .env.example to configure another machine.

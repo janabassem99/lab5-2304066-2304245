@@ -1,61 +1,114 @@
-USE library_lab4_2304066;
+-- Lab 5 Part II | Jana Bassem 2304066 | Farida Mohamed 2304245
+-- MySQL 8.0.31+ required for native INTERSECT and EXCEPT.
+USE library_lab5_2304066;
 
--- F2.1: runnable sample; change these values in DBeaver.
-SET @keyword = '';
-SET @minimum = 15;
-SET @maximum = 20;
-SET @category = NULL;
-SELECT b.book_id, b.title, b.price, c.name AS category
-FROM BOOK b JOIN CATEGORY c ON b.category_id=c.category_id
-WHERE b.title LIKE CONCAT('%', @keyword, '%') AND b.price BETWEEN @minimum AND @maximum
-AND (@category IS NULL OR b.category_id=@category)
-ORDER BY b.price ASC, b.book_id;
+-- F2.1 BONUS - book_details view
+SELECT d.title, d.price, (SELECT AVG(price) FROM BOOK) AS library_average
+FROM book_details d
+WHERE d.price > (SELECT AVG(price) FROM BOOK)
+ORDER BY d.price DESC, d.book_id;
 
--- F2.2
-SELECT b.book_id, b.title, b.price, b.publish_year, a.name AS author, p.name AS publisher, c.name AS category
-FROM BOOK b JOIN AUTHOR a ON b.author_id=a.author_id
-JOIN PUBLISHER p ON b.publisher_id=p.publisher_id
-JOIN CATEGORY c ON b.category_id=c.category_id ORDER BY b.title, b.book_id;
+-- F2.2(a)
+SELECT b.book_id, b.title
+FROM BOOK b
+WHERE NOT EXISTS (SELECT * FROM LOAN l WHERE l.book_id = b.book_id)
+ORDER BY b.book_id;
 
--- F2.3(a)
-SELECT c.category_id, c.name AS category, COUNT(b.book_id) AS books, AVG(b.price) AS average_price
-FROM CATEGORY c LEFT JOIN BOOK b ON b.category_id=c.category_id
-GROUP BY c.category_id, c.name ORDER BY c.name;
+-- F2.2(b)
+SELECT m.member_id, m.name, m.email
+FROM MEMBER m
+WHERE NOT EXISTS (SELECT * FROM LOAN l WHERE l.member_id = m.member_id)
+ORDER BY m.member_id;
 
--- F2.3(b)
-SELECT a.author_id, a.name AS author, COUNT(b.book_id) AS books
-FROM AUTHOR a JOIN BOOK b ON b.author_id=a.author_id
-GROUP BY a.author_id, a.name HAVING COUNT(b.book_id)>=2 ORDER BY books DESC, a.author_id;
+-- F2.3(a) BONUS - book_details view
+SELECT d.category, d.title, d.price
+FROM book_details d
+WHERE d.price = (
+    SELECT MAX(b.price) FROM BOOK b WHERE b.category_id = d.category_id
+)
+ORDER BY d.category, d.book_id;
 
--- F2.3(c)
-SELECT SUM(price) AS total_price, MIN(price) AS smallest_price, MAX(price) AS largest_price FROM BOOK;
+-- F2.3(b) BONUS - book_details view
+SELECT d.category, d.title, d.price,
+       (SELECT AVG(b.price) FROM BOOK b WHERE b.category_id = d.category_id) AS category_average
+FROM book_details d
+WHERE d.price > (
+    SELECT AVG(b.price) FROM BOOK b WHERE b.category_id = d.category_id
+)
+ORDER BY d.category, d.price DESC, d.book_id;
 
--- F2.4(a)
-SELECT l.loan_id, b.title, m.name AS member, l.loan_date
-FROM LOAN l JOIN BOOK b ON l.book_id=b.book_id JOIN MEMBER m ON l.member_id=m.member_id
-WHERE l.return_date IS NULL ORDER BY l.loan_date, l.loan_id;
+-- F2.4(a) - overall average
+SELECT AVG(t.loan_count) AS average_loans_per_member
+FROM (
+    SELECT m.member_id, COUNT(l.loan_id) AS loan_count
+    FROM MEMBER m LEFT JOIN LOAN l ON l.member_id = m.member_id
+    GROUP BY m.member_id
+) t;
+
+-- F2.4(a) - members above average
+SELECT m.member_id, m.name, COUNT(l.loan_id) AS loans
+FROM MEMBER m LEFT JOIN LOAN l ON l.member_id = m.member_id
+GROUP BY m.member_id, m.name
+HAVING COUNT(l.loan_id) > (
+    SELECT AVG(t.loan_count)
+    FROM (
+        SELECT m2.member_id, COUNT(l2.loan_id) AS loan_count
+        FROM MEMBER m2 LEFT JOIN LOAN l2 ON l2.member_id = m2.member_id
+        GROUP BY m2.member_id
+    ) t
+)
+ORDER BY loans DESC, m.member_id;
 
 -- F2.4(b)
-SELECT m.member_id, m.name, m.email FROM MEMBER m LEFT JOIN LOAN l ON m.member_id=l.member_id
-WHERE l.loan_id IS NULL ORDER BY m.member_id;
-
--- F2.4(c)
-SELECT b.book_id, b.title FROM BOOK b LEFT JOIN LOAN l ON b.book_id=l.book_id
-WHERE l.loan_id IS NULL ORDER BY b.book_id;
+SELECT a.author_id, a.name
+FROM AUTHOR a
+WHERE EXISTS (
+    SELECT * FROM BOOK b JOIN LOAN l ON l.book_id = b.book_id
+    WHERE b.author_id = a.author_id
+)
+ORDER BY a.author_id;
 
 -- F2.5(a)
-SELECT b.book_id, b.title, COUNT(l.loan_id) AS loans FROM BOOK b JOIN LOAN l ON b.book_id=l.book_id
-GROUP BY b.book_id, b.title ORDER BY loans DESC, b.book_id LIMIT 3;
+SELECT b.book_id, b.title, COUNT(r.review_id) AS review_count,
+       COALESCE(AVG(r.rating), 0) AS average_rating,
+       CASE
+           WHEN COUNT(r.review_id) = 0 THEN 'No review'
+           WHEN AVG(r.rating) >= 4.5 THEN 'Excellent'
+           WHEN AVG(r.rating) >= 3.5 THEN 'Good'
+           ELSE 'Fair'
+       END AS rating_label
+FROM BOOK b LEFT JOIN REVIEW r ON r.book_id = b.book_id
+GROUP BY b.book_id, b.title
+ORDER BY b.book_id;
 
 -- F2.5(b)
-SELECT m.member_id, m.name, COUNT(l.loan_id) AS loans FROM MEMBER m JOIN LOAN l ON m.member_id=l.member_id
-GROUP BY m.member_id, m.name ORDER BY loans DESC, m.member_id LIMIT 1;
+SELECT b.book_id, b.title, AVG(r.rating) AS average_rating,
+       (SELECT AVG(rating) FROM REVIEW) AS overall_average
+FROM BOOK b JOIN REVIEW r ON r.book_id = b.book_id
+GROUP BY b.book_id, b.title
+HAVING AVG(r.rating) > (SELECT AVG(rating) FROM REVIEW)
+ORDER BY average_rating DESC, b.book_id;
 
 -- F2.6(a)
-SELECT a.author_id, a.name AS author, COUNT(b.book_id) AS books FROM AUTHOR a LEFT JOIN BOOK b ON a.author_id=b.author_id
-GROUP BY a.author_id, a.name ORDER BY a.author_id;
+SELECT country FROM AUTHOR
+UNION
+SELECT country FROM PUBLISHER
+ORDER BY country;
 
 -- F2.6(b)
-SELECT b.title, a.name AS author, p.name AS publisher, a.country
-FROM BOOK b JOIN AUTHOR a ON b.author_id=a.author_id JOIN PUBLISHER p ON b.publisher_id=p.publisher_id
-WHERE a.country=p.country ORDER BY b.book_id;
+SELECT country FROM AUTHOR
+INTERSECT
+SELECT country FROM PUBLISHER
+ORDER BY country;
+
+-- F2.6(c)
+SELECT country FROM AUTHOR
+EXCEPT
+SELECT country FROM PUBLISHER
+ORDER BY country;
+
+-- F2.6(d)
+SELECT name, 'Author' AS type FROM AUTHOR
+UNION ALL
+SELECT name, 'Member' AS type FROM MEMBER
+ORDER BY name, type;

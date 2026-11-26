@@ -1,5 +1,5 @@
 -- Deterministic demonstration data; IDs 4001+ are separate from the old library.
-USE library_lab4_2304066;
+USE library_lab5_2304066;
 INSERT INTO AUTHOR VALUES
 (4001,'Naguib Mahfouz','Egypt'),(4002,'Ahdaf Soueif','Egypt'),
 (4003,'George Orwell','United Kingdom'),(4004,'Demo Author Without Books','France');
@@ -35,3 +35,17 @@ INSERT INTO LOAN VALUES
 (4010,4004,4001,'2026-09-01','2026-09-05'),
 (4011,4005,4003,'2026-10-04',NULL),
 (4012,4006,4004,'2026-09-01','2026-09-05');
+
+-- An author-only country is required for EXCEPT.
+INSERT INTO AUTHOR VALUES (5001,'Demo Spanish Author','Spain');
+-- Nine reviews cover every CASE label, different ratings and unreviewed books.
+INSERT INTO REVIEW VALUES
+(5001,4001,4001,5,'2026-11-01'),
+(5002,4001,4002,4,'2026-11-02'),
+(5003,4002,4001,5,'2026-11-03'),
+(5004,4002,4002,5,'2026-11-04'),
+(5005,4003,4001,3,'2026-11-05'),
+(5006,4003,4002,4,'2026-11-06'),
+(5007,4004,4001,2,'2026-11-07'),
+(5008,4005,4003,4,'2026-11-08'),
+(5009,4006,4004,1,'2026-11-09');

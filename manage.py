@@ -10,7 +10,7 @@ import pymysql
 
 ROOT = Path(__file__).resolve().parent
 CONFIG = dotenv_values(ROOT / 'website' / '.env')
-DATABASE = 'library_lab4_2304066'
+DATABASE = 'library_lab5_2304066'
 
 
 def connection():
@@ -90,7 +90,7 @@ def main():
     else:
         print('Usage: python manage.py init|check|run|reset')
         print('init: create a NEW assignment database; refuses to replace an existing one.')
-        print('reset: restore the six-table Lab 4 seed and remove uploads after confirmation.')
+        print('reset: restore the seven-table Lab 5 seed and remove uploads after confirmation.')
 
 
 if __name__ == '__main__':

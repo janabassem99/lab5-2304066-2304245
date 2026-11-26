@@ -1,12 +1,18 @@
-# Verification — 13 November 2026
+# Lab 5 verification
 
-- All three required SQL scripts executed successfully against a disposable MySQL database.
-- Verified six seed table counts, aggregate totals, zero-book authors, four open loans, and ranking results.
-- Verified 13 application routes, combined search filters, invalid values, and injection-style search text.
-- Verified book add/edit/delete and author → book → loan cascading deletion on disposable data.
-- Executed the complete problem2_Queries.sql script in DBeaver using the existing localhost connection; all 12 SELECT results produced result tabs.
-- Browser check: Palace + 15–20 returns Palace Walk at 18.50.
-- Original Lab 2 regression suite: 12 tests passed.
-- Live Lab 4 includes the three original authors and four original books plus demonstration data. Lab 2 and Lab 3 databases were not modified.
+Run python check_lab5.py to verify the new SQL and website using a disposable database.
 
-Screenshots: screenshots/lab4-search.png and screenshots/lab4-dbeaver.png.
+Passed on MySQL 8.4.11:
+- DDL, DML and every query script execute successfully.
+- Seven tables and the book_details view exist.
+- Nine seed reviews and every requested data case are present.
+- Fourteen report SELECTs return the expected seed results.
+- NOT EXISTS reports equal the earlier LEFT JOIN reports.
+- CHECK rejects ratings 0 and 6. UNIQUE rejects duplicate book/member pairs.
+- Foreign keys reject missing books and members.
+- Author deletion cascades through books to loans and reviews.
+- Tied category maxima appear, and the view reads updated base table values.
+- Fifteen page requests, earlier labs, invalid routes and bonus labels behave correctly.
+- Lab 4 search treats injection-style inputs as data.
+
+Local preparation copied 7 authors, 4 publishers, 4 categories, 14 books, 5 members and 12 loans from Lab 4 before adding the Lab 5 examples. The local report totals include those copied rows.

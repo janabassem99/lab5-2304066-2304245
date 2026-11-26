@@ -12,7 +12,7 @@ with c,c.cursor() as q:
  q.execute('CREATE DATABASE IF NOT EXISTS lab4_verification_2304066')
  try:
   for file in ['problem2_DDL.sql','problem2_DML.sql','problem2_Queries.sql']:
-   sql='\n'.join(x for x in (root/file).read_text().splitlines() if not x.strip().startswith('--')).replace('library_lab4_2304066','lab4_verification_2304066')
+   sql='\n'.join(x for x in (root/'lab4-reference'/file).read_text().splitlines() if not x.strip().startswith('--')).replace('library_lab4_2304066','lab4_verification_2304066')
    for statement in sql.split(';'):
     if statement.strip(): q.execute(statement)
   c.commit()
