@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A small library of books and authors. Database Lab 3, Part II.">
+  <meta name="description" content="A small library of books and authors. Database Labs 3, 4 and 5, Part II.">
   <title>{% block title %}The Reading Room{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script defer src="{{ url_for('static', filename='app.js') }}"></script>
@@ -14,7 +14,8 @@
   <nav class="lab-switcher" aria-label="Switch lab">
     <a href="/lab2/">Lab 2 · To-Do</a>
     <a href="/library/" >Lab 3 · Library</a>
-  <a href="/lab4/">Lab 4 · Search & reports</a></nav>
+  <a href="/lab4/">Lab 4 · Search & reports</a>
+  <a href="/lab5/">Lab 5 · Reviews & insights</a></nav>
   {% endif %}
   <header class="site-header">
     <div class="header-inner">
@@ -25,6 +26,7 @@
           <a href="{{ url_for('library.catalog', _anchor='authors') }}">Authors</a>
         {% endif %}
         <a href="{{ url_for('lab4.discussion') }}">Lab 4 discussion</a>
+        <a href="{{ url_for('lab5.discussion') }}">Lab 5 discussion</a>
         <button class="theme-toggle" type="button" aria-label="Switch color theme">Dark mode</button>
       </nav>
     </div>
@@ -36,7 +38,7 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="site-footer">
-    <div><strong>{{ 'Database Labs' if request.endpoint == 'home' else 'The Reading Room' }}</strong><span>{{ 'Database Systems · Labs 2, 3 & 4' if request.endpoint == 'home' else 'Database Systems · Library' }}</span></div>
+    <div><strong>{{ 'Database Labs' if request.endpoint == 'home' else 'The Reading Room' }}</strong><span>{{ 'Database Systems · Labs 2, 3, 4 & 5' if request.endpoint == 'home' else 'Database Systems · Library' }}</span></div>
     <div class="credits"><span>Jana Bassem <strong>2304066</strong></span><span>Farida Mohamed <strong>2304245</strong></span></div>
   </footer>
 </body>

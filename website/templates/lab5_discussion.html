@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Lab 5 discussion · The Reading Room{% endblock %}
+{% block content %}
+<article class="guide">
+<p class="eyebrow">LAB 5 · PART II</p>
+<h1>Your discussion guide.</h1>
+<p class="guide-intro">Seven tables, six report pages and the view bonus. Jana Bassem · 2304066 and Farida Mohamed · 2304245.</p>
+<a class="button primary" href="{{ url_for('lab5.report',page='above-average') }}">Open Lab 5 reports</a>
+<section><h2>Tables and constraints</h2>
+<p>REVIEW connects a member to a book. Its primary key is review_id. Foreign keys require an existing book and member. CHECK restricts rating to 1–5. UNIQUE(book_id, member_id) permits one review from a member per book. Deleting a book cascades to its reviews and loans. Deleting an author cascades through their books. Referenced members, publishers and categories use restrictive foreign keys.</p></section>
+<section><h2>F2.1 · Above the library average</h2><p>A scalar subquery calculates AVG(price). The outer query keeps prices above that value and sorts highest first. It displays that same library average in each row.</p>
+<pre>WHERE d.price &gt; (SELECT AVG(price) FROM BOOK)</pre></section>
+<section><h2>F2.2 · Never borrowed</h2><p>NOT EXISTS checks that no matching loan row exists for the current book or member. It returns the same IDs as Lab 4's LEFT JOIN with loan_id IS NULL. A returned loan still counts as borrowing history.</p></section>
+<section><h2>F2.3 · Best of the category</h2><p>The inner query uses the outer book's category_id, so it is correlated. MAX finds the most expensive price in that category. Every book tied at that price appears. The second query compares a book's price with AVG(price) in its own category. A one-book category has no book above its own average.</p></section>
+<section><h2>F2.4 · Active members</h2><p>A derived table in FROM first counts loans for each member. LEFT JOIN and COUNT(loan_id) give zero to members without loans. AVG then averages those counts. HAVING keeps members above that average. EXISTS shows each author once if at least one of their books has a loan.</p><p>Fresh seed example — 12 loans across 5 members gives 2.40. Reader A has 5 and Reader B has 3, so both qualify.</p></section>
+<section><h2>F2.5 · Reviews</h2><p>LEFT JOIN keeps every book. COUNT(review_id) gives 0 for an unreviewed book, while COALESCE(AVG(rating), 0) displays 0. CASE checks No review first, then Excellent at 4.5+, Good at 3.5+, and Fair otherwise. HAVING compares each book's average with AVG(rating) across individual review rows.</p><p>Fresh seed examples — Palace Walk is Excellent at 4.50, Sugar Street is Good at 3.50, The Map of Love is Fair at 2.00, and Animal Farm has No review. All nine ratings average 3.6667. This overall average is calculated across reviews, so books with more reviews contribute more ratings.</p></section>
+<section><h2>F2.6 · Countries and people</h2><p>UNION combines author and publisher countries and removes duplicates. INTERSECT keeps countries present in both. EXCEPT keeps author countries absent from publishers. These native operators need MySQL 8.0.31 or later. UNION ALL combines people with an Author or Member type while preserving different people who share a name.</p></section>
+<section class="notice"><h2>Bonus completed · book_details</h2><p>The view is defined at the end of problem2_DDL.sql. It joins BOOK, AUTHOR, PUBLISHER and CATEGORY once. F2.1 and both F2.3 queries use FROM book_details d. A view saves the SELECT definition and reads current base-table data whenever selected.</p>
+<pre>SELECT * FROM book_details;
+SHOW CREATE VIEW book_details;</pre></section>
+<section><h2>Python and SQL injection</h2><p>lab5.py selects a fixed query from lab5_queries.py using an allowlisted page name. It calls rows(), which executes SQL through PyMySQL. These reports take no free-text SQL input. The existing Lab 4 search keeps its placeholders and passes values separately through cursor.execute(sql, parameters).</p></section>
+<section><h2>Demonstrate in DBeaver</h2><p>Select library_lab5_2304066, expand Tables to show seven tables and Views to show book_details. Open problem2_Queries.sql and execute the SELECT statements. Compare Never borrowed with Lab 4, then open Reviews and explain each CASE label. Actual totals may include your imported records.</p><p>Show constraint tests using check_lab5.py against its disposable database. Fresh-setup DDL begins by dropping the Lab 5 schema, so use the SELECT script for your existing data.</p></section>
+</article>
+{% endblock %}

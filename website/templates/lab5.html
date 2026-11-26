@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Lab 5 · The Reading Room{% endblock %}
+{% block content %}
+<p class="eyebrow">THE READING ROOM · LAB 5</p><h1>{{ title }}</h1><p>{{ subtitle }}</p>
+<nav class="lab4-tabs" aria-label="Lab 5 reports">
+{% for key,label in [('above-average','Above average'),('never-borrowed','Never borrowed'),('categories','Categories'),('active-members','Active members'),('reviews','Reviews'),('countries','Countries & people')] %}
+<a class="button {{ 'primary' if active==key else 'secondary' }}" href="{{ url_for('lab5.report',page=key) }}" {% if active==key %}aria-current="page"{% endif %}>{{ label }}</a>
+{% endfor %}<a class="button secondary" href="{{ url_for('lab5.discussion') }}">Discussion & bonus</a></nav>
+{% if bonus %}<p class="notice"><strong>Bonus implemented</strong> · This page reads from the <code>book_details</code> view.</p>{% endif %}
+{% for heading, records in sections %}<section class="lab4-result"><h2>{{ heading }}</h2>
+{% if records %}<div class="table-wrap"><table><thead><tr>{% for column in records[0] %}<th scope="col">{{ column|replace('_',' ')|title }}</th>{% endfor %}</tr></thead><tbody>
+{% for record in records %}<tr>{% for key,value in record.items() %}<td>{% if value is none %}—{% elif key in ['price','library_average','category_average','average_loans_per_member','average_rating','overall_average'] %}{{ '%.2f'|format(value) }}{% else %}{{ value }}{% endif %}</td>{% endfor %}</tr>{% endfor %}
+</tbody></table></div>{% else %}<p class="notice">No matching records.</p>{% endif %}</section>{% endfor %}
+{% endblock %}
