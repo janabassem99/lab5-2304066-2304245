@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Lab 4 - Library website",
+      "name": "Lab 5 - Library website",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/website/app.py",
