@@ -1,0 +1,22 @@
+-- Lab 4 Part II | Jana Bassem 2304066 | Farida Mohamed 2304245
+-- Fresh setup only. This resets ONLY the Lab 4 database, not Lab 2 or Lab 3.
+DROP DATABASE IF EXISTS library_lab4_2304066;
+CREATE DATABASE library_lab4_2304066 CHARACTER SET utf8mb4;
+USE library_lab4_2304066;
+CREATE TABLE AUTHOR (author_id INT PRIMARY KEY, name VARCHAR(100) NOT NULL, country VARCHAR(50) NOT NULL);
+CREATE TABLE PUBLISHER (publisher_id INT PRIMARY KEY, name VARCHAR(100) NOT NULL, country VARCHAR(50) NOT NULL);
+CREATE TABLE CATEGORY (category_id INT PRIMARY KEY, name VARCHAR(100) NOT NULL);
+CREATE TABLE BOOK (
+ book_id INT PRIMARY KEY, title VARCHAR(150) NOT NULL, price DECIMAL(10,2) NOT NULL,
+ publish_year INT, author_id INT NOT NULL, publisher_id INT NOT NULL, category_id INT NOT NULL,
+ FOREIGN KEY (author_id) REFERENCES AUTHOR(author_id) ON DELETE CASCADE,
+ FOREIGN KEY (publisher_id) REFERENCES PUBLISHER(publisher_id),
+ FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
+);
+CREATE TABLE MEMBER (member_id INT PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(150) NOT NULL, join_date DATE NOT NULL);
+CREATE TABLE LOAN (
+ loan_id INT PRIMARY KEY, book_id INT NOT NULL, member_id INT NOT NULL,
+ loan_date DATE NOT NULL, return_date DATE,
+ FOREIGN KEY (book_id) REFERENCES BOOK(book_id) ON DELETE CASCADE,
+ FOREIGN KEY (member_id) REFERENCES MEMBER(member_id)
+);
