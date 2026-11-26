@@ -9,6 +9,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from library import library
 from lab4 import lab4
+from lab5 import lab5
 from lab2.app import create_app as create_lab2_app
 
 load_dotenv(Path(__file__).with_name('.env'))
@@ -22,7 +23,7 @@ def create_app(test_config=None):
         DB_PORT=int(os.getenv('DB_PORT', '3306')),
         DB_USER=os.getenv('DB_USER', 'root'),
         DB_PASSWORD=os.getenv('DB_PASSWORD', ''),
-        DB_NAME=os.getenv('DB_NAME', 'library_lab4_2304066'),
+        DB_NAME=os.getenv('DB_NAME', 'library_lab5_2304066'),
         LAB2_DB_NAME=os.getenv('LAB2_DB_NAME', 'registration'),
         UPLOAD_FOLDER=str(Path(__file__).parent / 'static' / 'uploads'),
         MAX_CONTENT_LENGTH=5 * 1024 * 1024,
@@ -35,6 +36,7 @@ def create_app(test_config=None):
     Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
     app.register_blueprint(library, url_prefix='/library')
     app.register_blueprint(lab4, url_prefix='/lab4')
+    app.register_blueprint(lab5, url_prefix='/lab5')
 
     @app.route('/')
     def home():
