@@ -18,3 +18,10 @@
 
 /* Lab 4 uses the same colours, typography and controls. */
 .lab4-tabs{display:flex;flex-wrap:wrap;gap:10px;margin:28px 0}.lab4-search{display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:16px;align-items:end;margin-bottom:28px}.lab4-result{margin:32px 0}.lab4-result h2{margin-bottom:16px}.lab4-result .table-wrap{overflow-x:auto}.lab4-result table{width:100%}.discussion-notes{max-width:850px;line-height:1.8}.discussion-notes pre{overflow:auto;padding:18px;background:var(--surface);border:1px solid var(--border)}@media(max-width:760px){.lab4-search{grid-template-columns:1fr}.lab4-tabs .button{padding:10px 14px}}
+
+/* Lab 5 reuses the established reading-room layout. */
+.lab4-result td{white-space:normal;min-width:110px}
+.lab4-result table{background:var(--surface);border:1px solid var(--line)}
+.lab4-tabs{align-items:center}
+.site-header nav{flex-wrap:wrap}
+.guide .notice{padding:24px}
